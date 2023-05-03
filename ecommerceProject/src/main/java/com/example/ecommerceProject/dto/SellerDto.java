@@ -20,9 +20,12 @@ public class SellerDto {
     private String password;
     @Email(message = "it should be email type")
     private String email;
-    private Address addresses;
+    private Address addresses;     //^[0-9]{2}[A-Z]{5}[0-9]{4}[A-Z]{1}[1-9A-Z]{1}Z[0-9A-Z]{1}$”
     private String confirmPassword;
 
+
+    @Pattern(regexp = "^[0-9]{2}[A-Z]{5}[0-9]{4}[A-Z]{1}[1-9A-Z]{1}Z[0-9A-Z]{1}$",
+            message = " must constain two digits, followed by five uppercase letters, four digits, one uppercase letter, one digit or uppercase letter that is not zero, the letter 'Z', and one more digit or uppercase letter")
     private String gst;
     private Long companyContact;
     private String companyName;

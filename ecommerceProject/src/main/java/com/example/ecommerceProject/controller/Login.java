@@ -30,7 +30,7 @@ public class Login {
     public String authenticateCustomerAndGetToken(@RequestBody LoginDto loginDto) {
         Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(loginDto.getEmail(), loginDto.getPassword()));
         if (authentication.isAuthenticated() && customerService.isActiveUser(loginDto.getEmail())) {
-            return customerService.generateLoginUserToken(loginDto.getEmail(), 300);
+            return customerService.generateLoginUserToken(loginDto.getEmail(), 24L);
         } else {
             throw new UsernameNotFoundException("invalid user request !");
         }
@@ -40,7 +40,7 @@ public class Login {
     public String authenticateSellerAndGetToken(@RequestBody LoginDto loginDto) {
         Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(loginDto.getEmail(), loginDto.getPassword()));
         if (authentication.isAuthenticated() && sellerService.isActiveUser(loginDto.getEmail())) {
-            return sellerService.generateLoginUserToken(loginDto.getEmail(), 300);
+            return sellerService.generateLoginUserToken(loginDto.getEmail(), 24L);
         } else {
             throw new UsernameNotFoundException("invalid user request !");
         }

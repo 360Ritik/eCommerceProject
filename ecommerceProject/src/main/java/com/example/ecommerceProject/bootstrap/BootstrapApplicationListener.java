@@ -50,6 +50,7 @@ public class BootstrapApplicationListener implements ApplicationListener<Context
             user.setEmail("Admin123@gmail.com");
             user.setPassword("Passadmin@123");
             user.setCreatedBy("admin");
+            user.setIsActive(true);
             Address address1 = new Address();
             address1.setAddressLine("line");
             address1.setCity("rohtak");

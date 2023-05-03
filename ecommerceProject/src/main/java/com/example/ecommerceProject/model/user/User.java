@@ -1,6 +1,8 @@
 package com.example.ecommerceProject.model.user;
 
 import com.example.ecommerceProject.auditing.Auditable;
+import com.example.ecommerceProject.model.tokenStore.RegisterToken;
+import com.example.ecommerceProject.model.tokenStore.TokenStore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -18,6 +20,10 @@ import java.util.List;
 @EntityListeners(AuditingEntityListener.class)
 public class User extends Auditable<String> {
 
+    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL)
+    TokenStore tokenStore;
+    @OneToOne(cascade = CascadeType.ALL, mappedBy = "user")
+    RegisterToken registerToken;
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "user_generator")
     @SequenceGenerator(name = "user_generator", sequenceName = "user_seq", initialValue = 1, allocationSize = 1)
@@ -25,20 +31,15 @@ public class User extends Auditable<String> {
     private String firstName;
     private String middleName;
     private String lastName;
-
     private String password;
-
     private String email;
-    private Boolean isDeleted;
+    private Boolean isDeleted = false;
     private Boolean isActive = false;
     private Boolean isLocked = false;
     private LocalDate passwordUpdateDate;
-
     @ManyToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     private List<Role> roles;
-
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<Address> addresses;
-
 
 }

@@ -1,6 +1,7 @@
 package com.example.ecommerceProject.controller;
 
 import com.example.ecommerceProject.dto.CustomerDto;
+import com.example.ecommerceProject.dto.PasswordReset;
 import com.example.ecommerceProject.repository.EmailSenderRepo;
 import com.example.ecommerceProject.service.customer.CustomerService;
 import jakarta.validation.Valid;
@@ -30,9 +31,8 @@ public class CustomerController {
         if (customerService.exitsEmailId(customerDto.getEmail())) {
             return new ResponseEntity<>("Email Already Registered", HttpStatus.BAD_REQUEST);
         }
-
-        customerService.generateRegisterUserToken(customerDto.getEmail(), 15);
         customerService.saveCustomerDetails(customerDto);
+        customerService.generateRegisterUserToken(customerDto.getEmail());
         return new ResponseEntity<>("User Registered Successfully!", HttpStatus.OK);
     }
 
@@ -42,8 +42,26 @@ public class CustomerController {
             customerService.ChangeCustomerStatus(token);
             return new ResponseEntity<>("Account activated Successfully", HttpStatus.OK);
         } else {
-
-            return new ResponseEntity<>("This is not a valid token", HttpStatus.BAD_REQUEST);
+            customerService.resendUserToken(token);
+            return new ResponseEntity<>("This is an expired token!\n we have send the new token to your email-id", HttpStatus.OK);
         }
+    }
+
+    @PatchMapping("/password/reset")
+    public ResponseEntity<String> userPasswordReset(@Valid @RequestBody PasswordReset email) {
+
+        if (!email.getPassword().equals(email.getConfirmPassword())) {
+
+            return new ResponseEntity<>("Password and Confirm password didn't match", HttpStatus.BAD_REQUEST);
+        }
+        if (customerService.passwordReset(email)) {
+
+            return new ResponseEntity<>("Password changed Successfully!", HttpStatus.OK);
+        } else {
+
+            return new ResponseEntity<>("User doesn't Exit!", HttpStatus.BAD_REQUEST);
+        }
+
+
     }
 }

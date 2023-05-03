@@ -9,10 +9,8 @@ import jakarta.persistence.PrimaryKeyJoinColumn;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
-import org.hibernate.Hibernate;
 
 import java.util.List;
-import java.util.Objects;
 
 
 @Data
@@ -33,16 +31,5 @@ public class Customer extends User {
     @OneToMany(mappedBy = "customer")
     private List<CustomerOrder> customerOrders;
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || Hibernate.getClass(this) != Hibernate.getClass(o)) return false;
-        Customer customer = (Customer) o;
-        return getId() != null && Objects.equals(getId(), customer.getId());
-    }
 
-    @Override
-    public int hashCode() {
-        return getClass().hashCode();
-    }
 }
