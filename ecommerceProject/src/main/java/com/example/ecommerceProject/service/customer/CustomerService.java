@@ -5,16 +5,11 @@ import com.example.ecommerceProject.dto.CustomerDto;
 import com.example.ecommerceProject.dto.PasswordReset;
 import com.example.ecommerceProject.enums.Authority;
 import com.example.ecommerceProject.model.tokenStore.RegisterToken;
-import com.example.ecommerceProject.model.user.Address;
-import com.example.ecommerceProject.model.user.Customer;
-import com.example.ecommerceProject.model.user.Role;
-import com.example.ecommerceProject.model.user.User;
-import com.example.ecommerceProject.repository.EmailSenderRepo;
-import com.example.ecommerceProject.repository.RegisterTokenRepo;
-import com.example.ecommerceProject.repository.RoleRepo;
-import com.example.ecommerceProject.repository.UserRepo;
+import com.example.ecommerceProject.model.user.*;
+import com.example.ecommerceProject.repository.*;
 import com.example.ecommerceProject.security.JwtService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -26,6 +21,7 @@ import java.util.UUID;
 
 
 @Service
+@Transactional
 public class CustomerService {
 
     @Autowired
@@ -40,6 +36,11 @@ public class CustomerService {
     EmailSenderRepo emailSenderRepo;
     @Autowired
     PasswordEncoder passwordEncoder;
+
+    @Autowired
+    JwtTokenRepo jwtTokenRepo;
+
+
     private String token = null;
 
     public void saveCustomerDetails(CustomerDto customerDto) {
@@ -50,14 +51,12 @@ public class CustomerService {
         customer.setPassword(passwordEncoder.encode(customerDto.getPassword()));
         customer.setEmail(customerDto.getEmail());
         customer.setContact(customerDto.getContact());
-//        customer.setAddresses(customerDto.getAddresses());
 
-        // Customer role
         Role role = roleRepo.findByAuthority(Authority.CUSTOMER);
         customer.setRoles(Collections.singletonList(role));
 
         //Created by
-        customer.setCreatedBy(customerDto.getFirstName());
+        // customer.setCreatedBy(customerDto.getFirstName());
 
         //Customer Address
         ArrayList<Address> list = new ArrayList<>();
@@ -92,7 +91,7 @@ public class CustomerService {
         return registerTokenRepo.existsRegisterTokenByUuidToken(token) && !jwtService.isTokenTimeExpired(token);
     }
 
-    @Transactional
+    @Modifying
     public void resendUserToken(String token) {
         if (registerTokenRepo.existsRegisterTokenByUuidToken(token) && jwtService.isTokenTimeExpired(token)) {
             RegisterToken registerToken = registerTokenRepo.getRegisterTokenByUuidToken(token);
@@ -127,8 +126,17 @@ public class CustomerService {
         emailSenderRepo.sendSimpleEmail(email, token, "customer");
     }
 
-    public String generateLoginUserToken(String email, Long hours) {
-        return jwtService.generateToken(email, hours);
+    public void generateLoginUserToken(String email, Long hours) {
+
+        User user = userRepo.getByEmail(email);
+        String loginToken = jwtService.generateToken(email, hours);
+        JwtToken jwtToken = new JwtToken();
+        jwtToken.setToken(loginToken);
+        jwtToken.setUser(user);
+        user.setLoginToken(jwtToken);
+        userRepo.save(user);
+
+
     }
 
     public boolean isActiveUser(String email) {
@@ -145,7 +153,14 @@ public class CustomerService {
             userRepo.save(user);
             return true;
         }
-
         return false;
+    }
+
+
+    public void logoutCustomer(String token) {
+
+        JwtToken jwtToken = jwtTokenRepo.findByToken(token);
+        jwtTokenRepo.deleteById(jwtToken.getId());
+
     }
 }

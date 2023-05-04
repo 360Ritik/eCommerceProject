@@ -12,5 +12,5 @@ public interface RegisterTokenRepo extends JpaRepository<RegisterToken, UUID> {
 
     RegisterToken getRegisterTokenByUuidToken(String token);
 
-    void deleteRegisterTokenByUuidToken(String token);
+
 }

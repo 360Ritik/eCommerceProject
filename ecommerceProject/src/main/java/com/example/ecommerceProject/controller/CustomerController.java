@@ -47,7 +47,7 @@ public class CustomerController {
         }
     }
 
-    @PatchMapping("/password/reset")
+    @PatchMapping("/forgot/password")
     public ResponseEntity<String> userPasswordReset(@Valid @RequestBody PasswordReset email) {
 
         if (!email.getPassword().equals(email.getConfirmPassword())) {

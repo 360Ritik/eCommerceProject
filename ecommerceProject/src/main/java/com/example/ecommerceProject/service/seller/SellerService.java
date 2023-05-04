@@ -4,14 +4,8 @@ import com.example.ecommerceProject.dto.PasswordReset;
 import com.example.ecommerceProject.dto.SellerDto;
 import com.example.ecommerceProject.enums.Authority;
 import com.example.ecommerceProject.model.tokenStore.RegisterToken;
-import com.example.ecommerceProject.model.user.Address;
-import com.example.ecommerceProject.model.user.Role;
-import com.example.ecommerceProject.model.user.Seller;
-import com.example.ecommerceProject.model.user.User;
-import com.example.ecommerceProject.repository.EmailSenderRepo;
-import com.example.ecommerceProject.repository.RegisterTokenRepo;
-import com.example.ecommerceProject.repository.RoleRepo;
-import com.example.ecommerceProject.repository.UserRepo;
+import com.example.ecommerceProject.model.user.*;
+import com.example.ecommerceProject.repository.*;
 import com.example.ecommerceProject.security.JwtService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -38,7 +32,9 @@ public class SellerService {
     EmailSenderRepo emailSenderRepo;
     private String token = null;
 
-    @Transactional
+    @Autowired
+    private JwtTokenRepo jwtTokenRepo;
+
 
     public void savesellerDetails(SellerDto sellerDto) {
 
@@ -65,7 +61,7 @@ public class SellerService {
 
 
         //Created by
-        seller.setCreatedBy(sellerDto.getFirstName());
+        // seller.setCreatedBy(sellerDto.getFirstName());
 
         //Register UUId Token generation
 
@@ -125,11 +121,14 @@ public class SellerService {
         userRepo.save(user);
     }
 
-    public String generateLoginUserToken(String email, Long hours) {
-        String token = jwtService.generateToken(email, hours);
-        emailSenderRepo.sendSimpleEmail(email, token, "seller");
-
-        return token;
+    public void generateLoginUserToken(String email, Long hours) {
+        User user = userRepo.getByEmail(email);
+        String loginToken = jwtService.generateToken(email, hours);
+        JwtToken jwtToken = new JwtToken();
+        jwtToken.setToken(loginToken);
+        jwtToken.setUser(user);
+        user.setLoginToken(jwtToken);
+        userRepo.save(user);
     }
 
     public boolean isActiveUser(String email) {
@@ -148,4 +147,13 @@ public class SellerService {
 
         return false;
     }
+
+
+    public void logoutSeller(String token) {
+
+        JwtToken jwtToken = jwtTokenRepo.findByToken(token);
+        jwtTokenRepo.deleteById(jwtToken.getId());
+
+    }
+
 }

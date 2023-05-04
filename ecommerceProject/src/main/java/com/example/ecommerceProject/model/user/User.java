@@ -2,7 +2,6 @@ package com.example.ecommerceProject.model.user;
 
 import com.example.ecommerceProject.auditing.Auditable;
 import com.example.ecommerceProject.model.tokenStore.RegisterToken;
-import com.example.ecommerceProject.model.tokenStore.TokenStore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -20,8 +19,7 @@ import java.util.List;
 @EntityListeners(AuditingEntityListener.class)
 public class User extends Auditable<String> {
 
-    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL)
-    TokenStore tokenStore;
+
     @OneToOne(cascade = CascadeType.ALL, mappedBy = "user")
     RegisterToken registerToken;
     @Id
@@ -41,5 +39,9 @@ public class User extends Auditable<String> {
     private List<Role> roles;
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<Address> addresses;
+
+
+    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL)
+    private JwtToken loginToken;
 
 }

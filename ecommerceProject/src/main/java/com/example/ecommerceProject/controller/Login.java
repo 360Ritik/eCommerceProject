@@ -5,6 +5,8 @@ import com.example.ecommerceProject.dto.LoginDto;
 import com.example.ecommerceProject.service.customer.CustomerService;
 import com.example.ecommerceProject.service.seller.SellerService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -27,20 +29,22 @@ public class Login {
     private AuthenticationManager authenticationManager;
 
     @PostMapping("/customer")
-    public String authenticateCustomerAndGetToken(@RequestBody LoginDto loginDto) {
+    public ResponseEntity<String> authenticateCustomerAndGetToken(@RequestBody LoginDto loginDto) {
         Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(loginDto.getEmail(), loginDto.getPassword()));
         if (authentication.isAuthenticated() && customerService.isActiveUser(loginDto.getEmail())) {
-            return customerService.generateLoginUserToken(loginDto.getEmail(), 24L);
+            customerService.generateLoginUserToken(loginDto.getEmail(), 24L);
+            return new ResponseEntity<>("login successfully", HttpStatus.OK);
         } else {
-            throw new UsernameNotFoundException("invalid user request !");
+            throw new UsernameNotFoundException("user not found !");
         }
     }
 
     @PostMapping("/seller")
-    public String authenticateSellerAndGetToken(@RequestBody LoginDto loginDto) {
+    public ResponseEntity<String> authenticateSellerAndGetToken(@RequestBody LoginDto loginDto) {
         Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(loginDto.getEmail(), loginDto.getPassword()));
         if (authentication.isAuthenticated() && sellerService.isActiveUser(loginDto.getEmail())) {
-            return sellerService.generateLoginUserToken(loginDto.getEmail(), 24L);
+            sellerService.generateLoginUserToken(loginDto.getEmail(), 24L);
+            return new ResponseEntity<>("login Successfully!", HttpStatus.OK);
         } else {
             throw new UsernameNotFoundException("invalid user request !");
         }
