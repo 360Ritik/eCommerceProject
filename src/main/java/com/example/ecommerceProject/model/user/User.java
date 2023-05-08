@@ -9,7 +9,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
-import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Data
@@ -21,7 +21,7 @@ import java.util.List;
 public class User extends Auditable<String> {
 
 
-    @OneToOne(cascade = CascadeType.ALL, mappedBy = "user")
+    @OneToOne(mappedBy = "user")
     RegisterToken registerToken;
     @Id
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "user_generator")
@@ -35,12 +35,15 @@ public class User extends Auditable<String> {
     private Boolean isDeleted = false;
     private Boolean isActive = false;
     private Boolean isLocked = false;
-    private LocalDate passwordUpdateDate;
+    private LocalDateTime passwordUpdateDate;
+    private Integer invalidAttemptCount = 3;
     @ManyToMany(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     private List<Role> roles;
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<Address> addresses;
 
+    @OneToOne(mappedBy = "user")
+    private JwtToken jwtToken;
 
     @OneToOne(mappedBy = "user")
     private JwtToken loginToken;

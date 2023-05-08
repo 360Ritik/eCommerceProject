@@ -2,5 +2,5 @@ package com.example.ecommerceProject.repository;
 
 
 public interface EmailSenderRepo {
-    void sendSimpleEmail(String toEmail, String token, String UserType);
+    void sendSimpleEmail(String toEmail, String subject, String body);
 }

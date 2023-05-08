@@ -1,22 +1,25 @@
 package com.example.ecommerceProject.controller;
 
 
+import com.example.ecommerceProject.dto.CustomerRegisterDto;
 import com.example.ecommerceProject.dto.LoginDto;
+import com.example.ecommerceProject.dto.PasswordChangeDto;
+import com.example.ecommerceProject.dto.ResponseDto;
+import com.example.ecommerceProject.repository.EmailSenderRepo;
+import com.example.ecommerceProject.repository.LoginService;
+import com.example.ecommerceProject.repository.PasswordService;
+import com.example.ecommerceProject.repository.UserRepo;
 import com.example.ecommerceProject.service.customer.CustomerService;
 import com.example.ecommerceProject.service.seller.SellerService;
 import jakarta.validation.Valid;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.core.Authentication;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.Locale;
 
 @RestController
-@RequestMapping("/login")
+@RequestMapping("/auth")
 public class Login {
 
     final
@@ -24,40 +27,53 @@ public class Login {
     final
     SellerService sellerService;
 
-    private final AuthenticationManager authenticationManager;
+    final
+    UserRepo userRepo;
+    final PasswordService passwordService;
 
-    public Login(CustomerService customerService, SellerService sellerService, AuthenticationManager authenticationManager) {
+
+    final
+    EmailSenderRepo emailSenderRepo;
+
+    final AuthenticationManager authenticationManager;
+
+    final LoginService loginService;
+
+    public Login(CustomerService customerService, SellerService sellerService, UserRepo userRepo, PasswordService passwordService, EmailSenderRepo emailSenderRepo, AuthenticationManager authenticationManager, LoginService loginService) {
         this.customerService = customerService;
         this.sellerService = sellerService;
+        this.userRepo = userRepo;
+        this.passwordService = passwordService;
+        this.emailSenderRepo = emailSenderRepo;
         this.authenticationManager = authenticationManager;
+        this.loginService = loginService;
     }
 
-    @PostMapping("/customer")
-    public ResponseEntity<String> authenticateCustomerAndGetToken(@Valid @RequestBody LoginDto loginDto) {
-        Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(loginDto.getEmail(), loginDto.getPassword()));
-        if (authentication.isAuthenticated() && customerService.isActiveUser(loginDto.getEmail())) {
-            String loginToken = customerService.generateLoginUserToken(loginDto.getEmail(), 24L);
-            return new ResponseEntity<>(loginToken, HttpStatus.OK);
-        }  if (!customerService.isActiveUser(loginDto.getEmail())) {
-            return new ResponseEntity<>(customerService.getLoginToken(loginDto.getEmail()), HttpStatus.OK);
-        } {
-            return new ResponseEntity<>("user not found !", HttpStatus.OK);
-        }
+    @PostMapping("registration/customer")
+    public ResponseEntity<ResponseDto> registerCustomer(@Valid @RequestBody CustomerRegisterDto customerRegisterDto,
+                                                        @RequestHeader(name = "Accept-Language",
+                                                                required = false) Locale locale) {
+        return customerService.registerNewCustomer(customerRegisterDto, locale);
     }
 
-    @PostMapping("/seller")
-    public ResponseEntity<String> authenticateSellerAndGetToken( @Valid @RequestBody LoginDto loginDto) {
-        Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(loginDto.getEmail(), loginDto.getPassword()));
-        if (authentication.isAuthenticated() && sellerService.isActiveUser(loginDto.getEmail())) {
-            String loginToken = sellerService.generateLoginUserToken(loginDto.getEmail(), 24L);
-            return new ResponseEntity<>(loginToken, HttpStatus.OK);
-        } else if (!sellerService.isActiveUser(loginDto.getEmail())) {
-            return new ResponseEntity<>(sellerService.getLoginToken(loginDto.getEmail()), HttpStatus.OK);
-        } else {
+    @PutMapping("activation/customer")
+    public ResponseEntity<ResponseDto> activateCustomerAccount(@RequestHeader(name = "token") String token) {
+        return customerService.activatingCustomer(token);
+    }
 
-            return new ResponseEntity<>("user not found !", HttpStatus.BAD_REQUEST);
+    @PostMapping("/login")
+    public ResponseEntity<ResponseDto> login(@Valid @RequestBody LoginDto loginDto) {
+        return loginService.login(loginDto);
+    }
 
-        }
+    @PutMapping("/reset/password")
+    public ResponseEntity<ResponseDto> resetPassword(@RequestParam String token, @Valid @RequestBody PasswordChangeDto forgetPasswordDto) {
+        return passwordService.resetPassword(token, forgetPasswordDto);
+    }
+
+    @PostMapping("/receiveToken/{email}")
+    public ResponseEntity<ResponseDto> receiveTokenUrl(@PathVariable String email) {
+        return passwordService.resetLink(email);
     }
 
 

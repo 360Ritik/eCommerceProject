@@ -12,6 +12,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
 import java.security.Key;
+import java.time.LocalDateTime;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
@@ -50,12 +51,12 @@ public class JwtService {
 
     public Boolean isTokenTimeExpired(String token) {
         RegisterToken registerToken = registerTokenRepo.getRegisterTokenByUuidToken(token);
-        Date currentDate = new Date();
-        Date expirationDate = registerToken.getValid();
+
+        LocalDateTime expirationDate = registerToken.getValid();
         System.out.println(expirationDate);
 
         // Calculate the difference between the expiration date and the current date in milliseconds
-        long timeDiff = currentDate.getTime() - expirationDate.getTime();
+        long timeDiff = LocalDateTime.now().getMinute() - expirationDate.getMinute();
         System.out.println(timeDiff);
 
         // If the time difference is greater than 0, the token is still valid
@@ -85,7 +86,7 @@ public class JwtService {
                 .setClaims(claims)
                 .setSubject(email)
                 .setIssuedAt(new Date(System.currentTimeMillis()))
-                .setExpiration(new Date(System.currentTimeMillis() + 1000 * 60 * time))
+                .setExpiration(new Date(System.currentTimeMillis() + 1000 * 6 * 60 * time))
                 .signWith(getSignKey(), SignatureAlgorithm.HS256).compact();
     }
 

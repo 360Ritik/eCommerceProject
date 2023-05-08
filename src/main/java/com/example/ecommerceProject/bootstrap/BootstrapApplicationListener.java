@@ -7,8 +7,10 @@ import com.example.ecommerceProject.model.user.Role;
 import com.example.ecommerceProject.model.user.User;
 import com.example.ecommerceProject.repository.RoleRepo;
 import com.example.ecommerceProject.repository.UserRepo;
+import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationListener;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.stereotype.Component;
 
@@ -23,6 +25,11 @@ public class BootstrapApplicationListener implements ApplicationListener<Context
 
     @Autowired
     private UserRepo userRepo;
+
+    @Bean
+    public ModelMapper modelMapper() {
+        return new ModelMapper();
+    }
 
     @Override
     public void onApplicationEvent(ContextRefreshedEvent event) {

@@ -5,7 +5,10 @@ import com.example.ecommerceProject.dto.SellerDto;
 import com.example.ecommerceProject.enums.Authority;
 import com.example.ecommerceProject.model.tokenStore.JwtToken;
 import com.example.ecommerceProject.model.tokenStore.RegisterToken;
-import com.example.ecommerceProject.model.user.*;
+import com.example.ecommerceProject.model.user.Address;
+import com.example.ecommerceProject.model.user.Role;
+import com.example.ecommerceProject.model.user.Seller;
+import com.example.ecommerceProject.model.user.User;
 import com.example.ecommerceProject.repository.*;
 import com.example.ecommerceProject.security.JwtService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,8 +16,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDateTime;
 import java.util.Collections;
-import java.util.Date;
 import java.util.UUID;
 
 @Service
@@ -80,9 +83,8 @@ public class SellerService {
         sellerToken.setUuidToken(uuid.toString());
         token = uuid.toString();
         sellerToken.setUser(seller);
-        long expirationTimeMillis = new Date().getTime() + (60 * 1000);
-        Date expirationDate = new Date(expirationTimeMillis);
-        sellerToken.setValid(expirationDate);
+
+        sellerToken.setValid(LocalDateTime.now().plusHours(3));
         seller.setRegisterToken(sellerToken);
 
 
@@ -110,9 +112,8 @@ public class SellerService {
             registerToken.setUuidToken(uuid.toString());
             token = uuid.toString();
 
-            long expirationTimeMillis = new Date().getTime() + (60 * 1000);
-            Date expirationDate = new Date(expirationTimeMillis);
-            registerToken.setValid(expirationDate);
+
+            registerToken.setValid(LocalDateTime.now().plusHours(3));
             seller.setRegisterToken(registerToken);
             registerTokenRepo.save(registerToken);
 
@@ -160,6 +161,8 @@ public class SellerService {
         if (userRepo.existsByEmail(passwordReset.getEmail())) {
             User user = userRepo.getByEmail(passwordReset.getEmail());
             user.setPassword(passwordEncoder.encode(passwordReset.getPassword()));
+
+            user.setPasswordUpdateDate(LocalDateTime.now());
             userRepo.save(user);
             return true;
         }

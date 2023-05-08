@@ -6,6 +6,8 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.LocalDateTime;
+
 @Entity
 @Data
 @NoArgsConstructor
@@ -18,6 +20,7 @@ public class JwtToken {
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "jwt_generator")
     @SequenceGenerator(name = "jwt_generator", sequenceName = "jwt_seq", initialValue = 1, allocationSize = 1)
     private Long id;
-    private Boolean isDeleted = false;
+
     private String token;
+    private LocalDateTime expireTime;
 }

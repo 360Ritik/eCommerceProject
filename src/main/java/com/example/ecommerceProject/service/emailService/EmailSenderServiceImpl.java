@@ -1,32 +1,39 @@
 package com.example.ecommerceProject.service.emailService;
 
 import com.example.ecommerceProject.repository.EmailSenderRepo;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.mail.javamail.JavaMailSender;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 @Service
+@Slf4j
 public class EmailSenderServiceImpl implements EmailSenderRepo {
 
-    final
     JavaMailSender javaMailSender;
+
+    @Value("${spring.mail.username}")
+    private String senderEmail;
 
     public EmailSenderServiceImpl(JavaMailSender javaMailSender) {
         this.javaMailSender = javaMailSender;
     }
 
     @Override
-    public void sendSimpleEmail(String toEmail, String token, String userType) {
+    @Async
+    public void sendSimpleEmail(String toEmail, String body, String subject) {
+
+
+        log.info("Email is send to {}", toEmail);
         SimpleMailMessage mailMessage = new SimpleMailMessage();
 
-        mailMessage.setFrom("ritik.kumar@tothenew.com");
+        mailMessage.setFrom(senderEmail);
         mailMessage.setTo(toEmail);
-        mailMessage.setSubject("Email Activation");
-        mailMessage.setText("To activate your account, please verify your email on the given link with the below token:" +
-                " " + "\n"
-                + "http://localhost:8080/activation/" + userType + "\n\n"
-                + "Token is valid for 15 minutes " + "\n" + token);
+        mailMessage.setSubject(subject);
+        mailMessage.setText(body);
+
         javaMailSender.send(mailMessage);
-        System.out.println("Mail send successfully!");
     }
 }

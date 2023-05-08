@@ -6,7 +6,7 @@ import jdk.jfr.Enabled;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.Date;
+import java.time.LocalDateTime;
 
 
 @Enabled
@@ -23,7 +23,7 @@ public class RegisterToken {
     private Long id;
 
     private String uuidToken;
-    private Date valid;
+    private LocalDateTime valid;
 
 
 }
